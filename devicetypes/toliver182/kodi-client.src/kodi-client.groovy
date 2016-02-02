@@ -16,7 +16,7 @@
 metadata {
 	definition (name: "Kodi Client", namespace: "toliver182", author: "toliver182") {
     	capability "Switch"
-		capability "Music Player"
+		capability "musicPlayer"
         
         command "scanNewClients"
         command "setPlaybackIcon", ["string"]
@@ -77,7 +77,15 @@ metadata {
 // parse events into attributes
 def parse(evt) {
 def msg = parseLanMessage(evt);
-log.debug "raw body: " + msg.body
+
+if(msg.header){
+if(msg.header.contains("Unauthorized")){
+log.debug "Cannot authenticate: Please check kodi username and password"
+return
+}
+}
+
+
 if (!msg.body){
 return
 }
