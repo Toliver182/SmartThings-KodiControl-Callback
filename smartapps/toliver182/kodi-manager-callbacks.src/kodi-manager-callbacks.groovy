@@ -161,7 +161,7 @@ mappings {
 	}
     path("/resume") {
         action: [
-            GET: "stateIsPause"
+            GET: "stateIsResume"
         ]
 	}  
 }
