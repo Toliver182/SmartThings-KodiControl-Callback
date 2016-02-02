@@ -24,9 +24,9 @@ metadata {
         command "setVolumeLevel", ["number"]        
 	}
 
-	simulator {
+	/*simulator {
 		// TODO: define status and reply messages here
-	}
+	}*/
 
 	tiles {    
         
@@ -84,16 +84,16 @@ return
 
 
 if( msg.body == "{\"id\":1,\"jsonrpc\":\"2.0\",\"result\":\"OK\"}"){
-log.debug "standard ok"
+log.debug "recieved ok"
 return
 }
 
 if( msg.body == "{\"id\":1,\"jsonrpc\":\"2.0\",\"result\":{\"speed\":0}}"){
-log.debug "standard ok"
+log.debug "recieved ok"
 return
 }
 if( msg.body == "{\"id\":1,\"jsonrpc\":\"2.0\",\"result\":{\"speed\":1}}"){
-log.debug "standard ok"
+log.debug "recieved ok"
 return
 }
 if (msg.body == "{\"error\":{\"code\":-32100,\"message\":\"Failed to execute method.\"},\"id\":1,\"jsonrpc\":\"2.0\"}")
@@ -102,60 +102,24 @@ log.debug "error returned from kodi"
 return
 }
 
-
+if (msg.body.startsWith("{\"id\":\"VideoGetItem\""))
+{
+log.debug "Getting title."
 def slurper = new groovy.json.JsonSlurper().parseText(msg.body)
-
-
-
-def playerId = slurper[0].result.collect { it?.playerid ?: [] }
-
-
-
-def PlayingState = device.currentState("status")
-if(!PlayingState){
-setPlaybackState("stopped")
-}
-if (playerId[0] > 0){
- PlayingState = device.currentState("status")
-            def speed = slurper[1].result.speed
-            def title = slurper[2].result.item.showtitle
+def title = slurper.result.item.showtitle
             if(!title){
             
-            title = slurper[2].result.item.title
+            title = slurper.result.item.title
             setPlaybackTitle(title)
+            log.debug "title is a movie: " + title
             }else{
-            title = title +" " + slurper[2].result.item.title
+            title = title +" " + slurper.result.item.title
+            log.debug "title is a tvshow: " + title
+
+
             setPlaybackTitle(title)
             }
-            
-			if (speed > 0){
-      			if (PlayingState.value != "playing"){
-                    def playbackState = "playing";           
-                   setPlaybackState(playbackState);
-           }
-} else{
- PlayingState = device.currentState("status")
-  		    if (PlayingState.value != "paused"){
-                def playbackState = "paused";           
-                setPlaybackState(playbackState);
-			}
-	}
-    } else {
-    if (msg.body.startsWith("{\"id\":1,\"jsonrpc\":\"2.0\",\"result\":")){
-    log.debug "vol hit"
-    }
-    
-    
-    
-    
-    log.debug "no player id"
-     if (PlayingState.value != "stopped"){
-                def playbackState = "stopped";    
-                setPlaybackState(playbackState);
-                }
-    
-    }
-
+}
 
 
 }
